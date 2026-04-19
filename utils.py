@@ -312,6 +312,16 @@ async def generate_image_via_chat(
         if collected_content.startswith("http"):
             logger.debug(f"content 本身是图片 URL: {collected_content}")
             return collected_content.strip()
+        
+        # 如果 content 中包含图片数据
+        if collected_content.startswith("data:image"):
+            logger.debug("content 中包含 base64 图片数据")
+            return collected_content.strip()
+        
+        # 或者，假设content中包含图片数据，但需要添加data头（存在数据？）
+        if re.match(r"^[A-Za-z0-9+/=]+$", collected_content.strip()):
+            logger.debug("content 中可能是纯 base64 图片数据，尝试添加 data 头")
+            return f"data:image/png;base64,{collected_content.strip()}"
 
     # 都没有找到
     raise ValueError("未能从模型响应中提取图片，请检查模型是否支持图像生成或提示词是否合适")
